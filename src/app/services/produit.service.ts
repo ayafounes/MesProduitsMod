@@ -1,61 +1,52 @@
 import { Injectable } from '@angular/core';
 import { produit } from '../model/produit.model';
+import { catchError, Observable, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+const httpOptions = { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) };
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProduitService {
-  produits : produit[];
-  
+  produits!: produit[];
+  apiURL: string = 'http://localhost:8090/produits/api';
 
+  constructor(private http: HttpClient) {}
 
-
-  constructor() {
-    this.produits=[
-      {
-        idProduit :1,nomProduit:"écouteurs sans fil",prixProduit:1000,dateCreation: new Date("12/27/2020") 
-      },
-      {idProduit :2,nomProduit:"samsung s24 ultra",prixProduit:4500,dateCreation: new Date("12/27/2023") },
-      {idProduit :3,nomProduit:"iphone 16",prixProduit:6500,dateCreation: new Date("12/12/2024") },
-      {idProduit :4,nomProduit:"pc msi",prixProduit:3000,dateCreation: new Date("10/12/2024") },
-      {idProduit :5,nomProduit:"nvidia rtx 4070",prixProduit:5500,dateCreation: new Date("5/12/2023") },
-      
-    ];
-
-   }
-   ListeProduits():produit[]{
-    return this.produits;
-  }
-  ajouterPrduit(p:produit){
-    this.produits.push(p);
-
-  }
-  SupprimerProduit(prod:produit){
-    const index=this.produits.indexOf(prod,0);
-    if(index>-1){
-      this.produits.splice(index,1);
-    }
-  }  
-  consulterProduit(id:number):produit{
-    return this.produits.find(p =>p.idProduit==id)!;
-    
-  }
-  updateProduit(p:produit){
-    this.SupprimerProduit(p);
-    this.ajouterPrduit(p);
-    this.trierProduits();
-
+  listeProduit(): Observable<produit[]> {
+    return this.http.get<produit[]>(this.apiURL);
   }
 
-  trierProduits(){
-    this.produits = this.produits.sort((n1,n2) => {
-    if (n1.idProduit! > n2.idProduit!) {
-    return 1;
-    }
-    if (n1.idProduit! < n2.idProduit!) {
-    return -1;
-    }
-    return 0;
+  ajouterProduit(prod: produit): Observable<produit> {
+    return this.http.post<produit>(this.apiURL, prod, httpOptions);
+  }
+
+  supprimerProduit(id: number) {
+    const url = `${this.apiURL}/${id}`;
+    return this.http.delete(url, httpOptions);
+  }
+
+  consulterProduit(id: number): Observable<produit> {
+    const url = `${this.apiURL}/${id}`;
+    return this.http.get<produit>(url);
+  }
+
+  // Fix the parameter name to match the expected argument
+  updateProduit(prod :produit) : Observable<produit>
+{
+return this.http.put<produit>(this.apiURL, prod, httpOptions);
+}
+
+  trierProduits() {
+    this.produits = this.produits.sort((n1, n2) => {
+      if (n1.idProduit! > n2.idProduit!) {
+        return 1;
+      }
+      if (n1.idProduit! < n2.idProduit!) {
+        return -1;
+      }
+      return 0;
     });
-    }
+  }
 }

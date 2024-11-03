@@ -1,28 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProduitService } from '../services/produit.service';
 import { produit } from '../model/produit.model';
+import { Categorie } from '../model/categorie.model';
 
 @Component({
   selector: 'app-update-produit',
   templateUrl: './update-produit.component.html',
-  styleUrl: './update-produit.component.css'
+  styleUrls: ['./update-produit.component.css']
 })
-export class UpdateProduitComponent {
-  currentProduit =new produit();
-  constructor(private activatedRoute:ActivatedRoute,
-    private produitService:ProduitService,
-    private router :Router
+export class UpdateProduitComponent implements OnInit {
+  currentProduit: produit = new produit(); // Ensure it's initialized
+  categories!: Categorie[];
+  updatedCatId!: number;
+
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private produitService: ProduitService,
+    private router: Router
   ) {}
-  ngOnInit():void{
-    this.currentProduit=this.produitService.consulterProduit(this.activatedRoute.snapshot.params['id']);
-    console.log(this.currentProduit);
 
+  ngOnInit(): void {
+    this.produitService.consulterProduit(this.activatedRoute.snapshot.params['id']).
+ subscribe( prod =>{ this.currentProduit = prod; } ) ;
+  }
 
-  }
-  updateProduit(){
-    this.produitService.updateProduit(this.currentProduit);
-    this.router.navigate(['produits']);
-  }
+  updateProduit() {
+    this.produitService.updateProduit(this.currentProduit).subscribe(prod => {
+      this.router.navigate(['produits']); }
+      );
+      
+}
+
 
 }
